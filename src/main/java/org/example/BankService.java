@@ -18,7 +18,7 @@ public class BankService {
         user.addAccount(account);
     }
 
-    // переводит средства между счетами
+    // Переводит средства между счетами
     public void transfer(BankAccount source, BankAccount target, BigDecimal amount){
 
         BankAccount sourceAccount = (BankAccount) source;
