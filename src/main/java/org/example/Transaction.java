@@ -21,11 +21,11 @@ public class Transaction {
     // уникальный идентификатор транзакции
     String id;
 
+    // тип транзакции
+    Type type;
+
     // сумма транзакции
     BigDecimal amount = new BigDecimal(0);
-
-    // тип транзакции
-    String type;
 
     // дата выполнения транзакции
     LocalDateTime date;
@@ -36,8 +36,15 @@ public class Transaction {
     // получатель транзакции (если применимо)
     BankAccount targetAccount;
 
+    // тип транзакции
+    public enum Type {
+        TRANSFER,
+        DEPOSIT,
+        WITHDRAW
+    }
+
     // конструктор для снятия и пополнения
-    public Transaction(String id, BigDecimal amount, String type, LocalDateTime date) {
+    public Transaction(String id, BigDecimal amount, Type type, LocalDateTime date) {
         this.id = id;
         this.amount = amount;
         this.type = type;
@@ -45,7 +52,7 @@ public class Transaction {
     }
 
     // конструктор для переводов (с целями и источниками)
-    public Transaction(String id, BigDecimal amount, String type, LocalDateTime date, BankAccount sourceAccount, BankAccount targetAccount) {
+    public Transaction(String id, BigDecimal amount, Type type, LocalDateTime date, BankAccount sourceAccount, BankAccount targetAccount) {
         this.id = id;
         this.amount = amount;
         this.type = type;
@@ -56,13 +63,14 @@ public class Transaction {
 
     // переписал метод toString для корректного вывода истории транзакций
     @Override
-    public  String toString() {
-            return "Transaction{" +
-                    "amount=" + amount +
-                    ", type=" + type +
-                    ", source=" + (sourceAccount != null ? sourceAccount.getAccountNumber() : "N/A") +
-                    ", target=" + (targetAccount != null ? targetAccount.getAccountNumber() : "N/A") +
-                    "}" + "\n";
+    public String toString() {
+        return "Transaction{" +
+                "id='" + id + '\'' +
+                ", amount=" + amount +
+                ", type=" + type +
+                ", source=" + (sourceAccount != null ? sourceAccount.getAccountNumber() : "N/A") +
+                ", target=" + (targetAccount != null ? targetAccount.getAccountNumber() : "N/A") +
+                "}" + "\n";
 
     }
 }

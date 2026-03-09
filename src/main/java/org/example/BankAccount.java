@@ -24,10 +24,10 @@ import java.util.List;
 public class BankAccount {
 
     // уникальный номер счета
-    String accountNumber;
+    private String accountNumber;
 
     // текущий баланс счета
-    BigDecimal balance = new BigDecimal(0);
+    BigDecimal balance = BigDecimal.ZERO;
 
     // владелец счета
     User owner;
@@ -36,12 +36,12 @@ public class BankAccount {
     List<Transaction> transactions = new ArrayList<>();
 
     // пополнение счета
-    public void deposit(BigDecimal amount){
+    public void deposit(BigDecimal amount) {
         balance = balance.add(amount);
     }
 
     // снятие средств со счета
-    public void withdraw(BigDecimal amount){
+    public void withdraw(BigDecimal amount) {
         balance = balance.subtract(amount);
     }
 
@@ -51,7 +51,7 @@ public class BankAccount {
     }
 
     // добавляет транзакцию в историю
-    public void addTransaction(Transaction transaction){
+    public void addTransaction(Transaction transaction) {
         transactions.add(transaction);
     }
 
