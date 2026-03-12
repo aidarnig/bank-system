@@ -30,19 +30,20 @@ public class Main {
         // Пополняем первый счет
 //        acc1.deposit(new BigDecimal("1000"));
         // bankService.deposit(BigDecimal.valueOf(1000), acc1);
-        bankService.operation(Transaction.Type.DEPOSIT, BigDecimal.valueOf(1000), acc1);
+        bankService.createTransaction(Transaction.Type.DEPOSIT, BigDecimal.valueOf(1000), acc1, null);
 
         // Выводим балансы
         System.out.println("Balance of ACC123: " + acc1.getBalance() + "\n");
         System.out.println("Balance of ACC456: " + acc2.getBalance() + "\n");
 
         // Переводим средства между счетами
-        bankService.transfer(acc1, acc2, new BigDecimal("400"));
+        //  bankService.transfer(acc1, acc2, new BigDecimal("400"));
+        bankService.createTransaction(Transaction.Type.TRANSFER, BigDecimal.valueOf(400), acc1, acc2);
 
         // снимаем средства со второго счета
         //       acc2.withdraw(new BigDecimal("200"));
         //   bankService.withdraw(BigDecimal.valueOf(200), acc2);
-        bankService.operation(Transaction.Type.WITHDRAW, BigDecimal.valueOf(200), acc2);
+        bankService.createTransaction(Transaction.Type.WITHDRAW, BigDecimal.valueOf(200), acc2, null);
 
 
         // Выводим балансы

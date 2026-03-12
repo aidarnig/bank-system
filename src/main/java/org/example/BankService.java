@@ -19,7 +19,7 @@ public class BankService {
         BankAccount account = new BankAccount(accountNumber);
         user.addAccount(account);
     }
-
+/*
     // Переводит средства между счетами
     public void transfer(BankAccount source, BankAccount target, BigDecimal amount) {
 
@@ -36,6 +36,8 @@ public class BankService {
             target.addTransaction(transactionTarget);
         }
     }
+
+ */
 
     // возвращает историю транзакций для указанного счета.
     public List<Transaction> getTransactionHistory(BankAccount account) {
@@ -54,27 +56,37 @@ public class BankService {
     }
 
     // общий метод для списания / начисления
-    public void operation(Transaction.Type type, BigDecimal amount, BankAccount account) {
+    public void createTransaction(Transaction.Type type, BigDecimal amount, BankAccount source, BankAccount target) {
         Transaction transaction;
         switch (type) {
             case DEPOSIT:
-                account.deposit(amount);
-                transaction = new Transaction(UUID.randomUUID().toString(), amount, Transaction.Type.DEPOSIT, LocalDateTime.now());
-                account.addTransaction(transaction);
+                source.deposit(amount);
+                source.addTransaction(new Transaction(UUID.randomUUID().toString(), amount, type, LocalDateTime.now()));
                 break;
             case WITHDRAW:
                 // проверка на достаточность средств
-                if (amount.compareTo(account.balance) > 0) {
-                    throw new InsufficientFundsException(account.balance, amount);
+                if (amount.compareTo(source.balance) > 0) {
+                    throw new InsufficientFundsException(source.balance, amount);
                 } else {
-                    account.withdraw(amount);
-                    transaction = new Transaction(UUID.randomUUID().toString(), amount, Transaction.Type.WITHDRAW, LocalDateTime.now());
-                    account.addTransaction(transaction);
+                    source.withdraw(amount);
+                    source.addTransaction(new Transaction(UUID.randomUUID().toString(), amount, type, LocalDateTime.now()));
+                }
+                break;
+
+            case TRANSFER:
+                // проверка на достаточность средств
+                if (amount.compareTo(source.balance) > 0) {
+                    throw new InsufficientFundsException(source.balance, amount);
+                } else {
+                    source.withdraw(amount);
+                    source.addTransaction(new Transaction(UUID.randomUUID().toString(), amount, Transaction.Type.TRANSFER, LocalDateTime.now(), source, target));
+                    target.deposit(amount);
+                    target.addTransaction(new Transaction(UUID.randomUUID().toString(), amount, Transaction.Type.TRANSFER, LocalDateTime.now(), source, target));
                 }
                 break;
 
             default:
-
+                throw new InvalidTransactionException(type);
 
         }
     }
