@@ -13,7 +13,7 @@ public class Main {
         );
 
         // создаем пользователя
-        User user = context.getBean("user",User.class);
+        User user = context.getBean("user", User.class);
 
         // создаем сервис
         BankService bankService = context.getBean("bankService", BankService.class);
@@ -29,14 +29,22 @@ public class Main {
 
         // Пополняем первый счет
 //        acc1.deposit(new BigDecimal("1000"));
-        bankService.deposit(BigDecimal.valueOf(1000), acc1);
+        // bankService.deposit(BigDecimal.valueOf(1000), acc1);
+        bankService.createTransaction(Transaction.Type.DEPOSIT, BigDecimal.valueOf(1000), acc1, null);
+
+        // Выводим балансы
+        System.out.println("Balance of ACC123: " + acc1.getBalance() + "\n");
+        System.out.println("Balance of ACC456: " + acc2.getBalance() + "\n");
 
         // Переводим средства между счетами
-        bankService.transfer(acc1, acc2, new BigDecimal("400"));
+        //  bankService.transfer(acc1, acc2, new BigDecimal("400"));
+        bankService.createTransaction(Transaction.Type.TRANSFER, BigDecimal.valueOf(400), acc1, acc2);
 
         // снимаем средства со второго счета
- //       acc2.withdraw(new BigDecimal("200"));
-        bankService.withdraw(BigDecimal.valueOf(200), acc2);
+        //       acc2.withdraw(new BigDecimal("200"));
+        //   bankService.withdraw(BigDecimal.valueOf(200), acc2);
+        bankService.createTransaction(Transaction.Type.WITHDRAW, BigDecimal.valueOf(200), acc2, null);
+
 
         // Выводим балансы
         System.out.println("Balance of ACC123: " + acc1.getBalance() + "\n");
@@ -44,11 +52,11 @@ public class Main {
 
         // Выводим историю транзакций
         System.out.println("Transaction history for ACC123:");
-        bankService.getTransactionHistory(acc1);
+        System.out.println(bankService.getTransactionHistory(acc1));
 
         // Выводим историю транзакций
         System.out.println("Transaction history for ACC456:");
-        bankService.getTransactionHistory(acc2);
+        System.out.println(bankService.getTransactionHistory(acc2));
 
         // Выводим общий баланс на счете user
         System.out.println("\n" + "Total balance: " + bankService.getTotalBalance(user));
