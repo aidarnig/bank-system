@@ -1,4 +1,4 @@
-/*
+/**
 - Методы:
     1. `createAccount(User user, String accountNumber)`: создает новый счет для пользователя.
     2. `transfer(BankAccount source, BankAccount target, BigDecimal amount)`: переводит средства между счетами (с проверкой на достаточность средств).
@@ -6,7 +6,13 @@
     4. `getTotalBalance(User user)`: возвращает общий баланс всех счетов пользователя.
  */
 
-package org.example;
+package org.example.service;
+
+import org.example.exception.InsufficientFundsException;
+import org.example.exception.InvalidTransactionException;
+import org.example.entity.BankAccount;
+import org.example.entity.Transaction;
+import org.example.entity.User;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -65,8 +71,8 @@ public class BankService {
                 break;
             case WITHDRAW:
                 // проверка на достаточность средств
-                if (amount.compareTo(source.balance) > 0) {
-                    throw new InsufficientFundsException(source.balance, amount);
+                if (amount.compareTo(source.getBalance()) > 0) {
+                    throw new InsufficientFundsException(source.getBalance(), amount);
                 } else {
                     source.withdraw(amount);
                     source.addTransaction(new Transaction(UUID.randomUUID().toString(), amount, type, LocalDateTime.now()));
@@ -75,8 +81,8 @@ public class BankService {
 
             case TRANSFER:
                 // проверка на достаточность средств
-                if (amount.compareTo(source.balance) > 0) {
-                    throw new InsufficientFundsException(source.balance, amount);
+                if (amount.compareTo(source.getBalance()) > 0) {
+                    throw new InsufficientFundsException(source.getBalance(), amount);
                 } else {
                     source.withdraw(amount);
                     source.addTransaction(new Transaction(UUID.randomUUID().toString(), amount, Transaction.Type.TRANSFER, LocalDateTime.now(), source, target));

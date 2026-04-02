@@ -1,4 +1,4 @@
-/*
+/**
 ### **2.3. Класс** `Transaction`
 
 - Поля:
@@ -12,35 +12,46 @@
     - Конструктор для создания транзакции.
  */
 
-package org.example;
+package org.example.entity;
+
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+
 public class Transaction {
     // уникальный идентификатор транзакции
-    String id;
+    private final String id;
 
     // тип транзакции
-    Type type;
+    @Getter
+    private final Type type;
+
+    // категория (домашка 2 недели)
+    @Getter
+    private String category;
 
     // сумма транзакции
-    BigDecimal amount = new BigDecimal(0);
+    @Getter
+    private BigDecimal amount = BigDecimal.ZERO;
 
     // дата выполнения транзакции
-    LocalDateTime date;
+    @Getter
+    private final LocalDateTime date;
 
     // источник транзакции (если применимо)
-    BankAccount sourceAccount;
+    private BankAccount sourceAccount;
 
     // получатель транзакции (если применимо)
-    BankAccount targetAccount;
+    private BankAccount targetAccount;
 
     // тип транзакции
     public enum Type {
         TRANSFER,
         DEPOSIT,
-        WITHDRAW
+        WITHDRAW,
+        PAYMENT
     }
 
     // конструктор для снятия и пополнения
@@ -48,6 +59,15 @@ public class Transaction {
         this.id = id;
         this.amount = amount;
         this.type = type;
+        this.date = date;
+    }
+
+    // конструктор для снятия и пополнения c КАТЕГОРИЯМИ (2 неделя)
+    public Transaction(String id, BigDecimal amount, Type type, String category, LocalDateTime date) {
+        this.id = id;
+        this.amount = amount;
+        this.type = type;
+        this.category = category;
         this.date = date;
     }
 
