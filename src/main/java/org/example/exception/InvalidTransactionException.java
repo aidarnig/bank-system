@@ -1,4 +1,6 @@
-package org.example;
+package org.example.exception;
+
+import org.example.entity.Transaction;
 
 public class InvalidTransactionException extends RuntimeException {
     public InvalidTransactionException(Transaction.Type type) {
