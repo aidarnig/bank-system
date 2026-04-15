@@ -1,4 +1,4 @@
-/*
+/**
 ### **2.2. Класс** `User`
 
 - Поля:
@@ -10,35 +10,34 @@
     - `getAccounts()`: возвращает список счетов пользователя.
  */
 
-package org.example;
+package org.example.entity;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class User {
 
     // уникальный идентификатор пользователя
-    String id;
+    @NonNull
+    private final String id;
 
     // имя пользователя
-    String name;
+    @NonNull
+    private String name;
 
+    // возвращает список счетов пользователя.
     // список счетов пользователя
-    List<BankAccount> accounts = new ArrayList<BankAccount>();
-
-    public User(String id, String name) {
-        this.id = id;
-        this.name = name;
-    }
+    @Getter
+    private final List<BankAccount> accounts = new ArrayList<BankAccount>();
 
     // добавление нового счета пользователю
     public void addAccount(BankAccount account){
         accounts.add(account);
-    }
-
-    // возвращает список счетов пользователя.
-    public List<BankAccount> getAccounts() {
-        return accounts;
     }
 
 }

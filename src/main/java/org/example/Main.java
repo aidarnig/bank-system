@@ -1,5 +1,10 @@
 package org.example;
 
+import org.example.config.SpringConfig;
+import org.example.entity.BankAccount;
+import org.example.service.BankService;
+import org.example.entity.Transaction;
+import org.example.entity.User;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.math.BigDecimal;

@@ -1,4 +1,4 @@
-/*
+/**
 ### **2.1. Класс** `BankAccount`
 
 - Поля:
@@ -13,27 +13,37 @@
     - `addTransaction(Transaction transaction)`: добавляет транзакцию в историю.
  */
 
-package org.example;
+package org.example.entity;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
-import java.sql.SQLOutput;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class BankAccount {
 
+    // не по условию. Для вывода в историю транзакций
     // уникальный номер счета
-    private String accountNumber;
+    @NonNull
+    @Getter
+    private final String accountNumber;
 
+    // возвращает текущий баланс
     // текущий баланс счета
-    BigDecimal balance = BigDecimal.ZERO;
+    @Getter
+    private BigDecimal balance = BigDecimal.ZERO;
 
     // владелец счета
-    User owner;
+    private User owner;
 
+    // не по условию. Получение истории транзакций
     // история транзакций
-    List<Transaction> transactions = new ArrayList<>();
+    @Getter
+    private final List<Transaction> transactions = new ArrayList<>();
 
     // пополнение счета
     public void deposit(BigDecimal amount) {
@@ -45,28 +55,9 @@ public class BankAccount {
         balance = balance.subtract(amount);
     }
 
-    // возвращает текущий баланс
-    public BigDecimal getBalance() {
-        return balance;
-    }
-
     // добавляет транзакцию в историю
     public void addTransaction(Transaction transaction) {
         transactions.add(transaction);
     }
 
-    // не по условию. Получение истории транзакций
-    public List<Transaction> getTransactions() {
-        return transactions;
-    }
-
-    // не по условию. Для вывода в историю транзакций
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-
-    // не по условию. Конструктор для сохранения номера
-    public BankAccount(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
 }
