@@ -38,6 +38,7 @@ public class BankAccount {
     private BigDecimal balance = BigDecimal.ZERO;
 
     // владелец счета
+    @Getter
     private User owner;
 
     // не по условию. Получение истории транзакций
