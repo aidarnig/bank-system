@@ -13,8 +13,8 @@ import java.util.stream.Stream;
 
 public class AnalysisService {
 
-    private boolean isWithinLastMonth(LocalDateTime date) {
-        return date.isAfter(LocalDateTime.now().minusMonths(1)) && date.isBefore(LocalDateTime.now().plusDays(1));
+    private boolean isWithinLastMonth(LocalDateTime dateEnd, LocalDateTime dateStart) {
+        return dateEnd.isAfter(dateStart.minusMonths(1)) && dateEnd.isBefore(dateStart.plusDays(1));
     }
 
     private Stream<Transaction> getAllPaymentTransactions(User user) {
@@ -43,7 +43,7 @@ public class AnalysisService {
         return bankAccount.getTransactions().stream()
                 .filter(t -> t.getType() == Transaction.Type.PAYMENT)
                 .filter(t -> t.getCategory().equals(category))
-                .filter(t -> isWithinLastMonth(t.getDate()))
+                .filter(t -> isWithinLastMonth(t.getDate(), LocalDateTime.now()))
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -74,7 +74,7 @@ public class AnalysisService {
 
         return getAllPaymentTransactions(user)
                 .filter(t -> categories.contains(t.getCategory()))
-                .filter(t -> isWithinLastMonth(t.getDate()))
+                .filter(t -> isWithinLastMonth(t.getDate(),  LocalDateTime.now()))
                 .collect(Collectors.groupingBy(Transaction::getCategory, Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)));
 
 /* старая реализация
@@ -166,7 +166,7 @@ public class AnalysisService {
          */
 
         if (user == null || n <= 0) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
         return user.getAccounts().stream()
