@@ -7,8 +7,24 @@ import org.example.entity.User;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 public class AnalysisService {
+
+    private boolean isWithinLastMonth(LocalDateTime dateEnd, LocalDateTime dateStart) {
+        return dateEnd.isAfter(dateStart.minusMonths(1)) && dateEnd.isBefore(dateStart.plusDays(1));
+    }
+
+    private Stream<Transaction> getAllPaymentTransactions(User user) {
+        if (user == null) {
+            return Stream.empty();
+        }
+        return user.getAccounts().stream()
+                .flatMap(account -> account.getTransactions().stream())
+                .filter(transaction -> transaction.getType() == Transaction.Type.PAYMENT);
+    }
 
     public BigDecimal getMonthlySpendingByCategory(BankAccount bankAccount, String category) {
         /**
@@ -19,19 +35,28 @@ public class AnalysisService {
          *     - Если категория не существует или счет равен `null`, метод возвращает `BigDecimal.ZERO`.
          *     - Транзакции старше одного месяца от текущей даты не учитываются.
          */
-        BigDecimal totalSpending = BigDecimal.ZERO;
 
-        if (bankAccount == null || category == null) {
-            return totalSpending;
+        if (bankAccount == null) {
+            return BigDecimal.ZERO;
         }
 
+        return bankAccount.getTransactions().stream()
+                .filter(t -> t.getType() == Transaction.Type.PAYMENT)
+                .filter(t -> t.getCategory().equals(category))
+                .filter(t -> isWithinLastMonth(t.getDate(), LocalDateTime.now()))
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        /* старая реализация
         for (Transaction transaction : bankAccount.getTransactions()) {
             if ((transaction.getType() == Transaction.Type.PAYMENT) && transaction.getCategory().equals(category) && transaction.getDate().isAfter(LocalDateTime.now().minusMonths(1)) && transaction.getDate().isBefore(LocalDateTime.now().plusDays(1))) {
 
                 totalSpending = totalSpending.add(transaction.getAmount());
             }
         }
-        return totalSpending;
+
+         */
+
     }
 
     public Map<String, BigDecimal> getMonthlySpendingByCategories(User user, Set<String> categories) {
@@ -43,12 +68,16 @@ public class AnalysisService {
          *     - Если пользователь равен `null` или категории не существуют, метод возвращает пустую `Map`.
          */
 
-        Map<String, BigDecimal> monthlySpending = new HashMap<>();
-
         if (user == null || categories == null || categories.isEmpty()) {
-            return monthlySpending;
+            return new HashMap<>();
         }
 
+        return getAllPaymentTransactions(user)
+                .filter(t -> categories.contains(t.getCategory()))
+                .filter(t -> isWithinLastMonth(t.getDate(),  LocalDateTime.now()))
+                .collect(Collectors.groupingBy(Transaction::getCategory, Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)));
+
+/* старая реализация
         for (BankAccount bankAccount : user.getAccounts()) {
             for (Transaction transaction : bankAccount.getTransactions()) {
                 if ((transaction.getType() == Transaction.Type.PAYMENT) && transaction.getDate().isAfter(LocalDateTime.now().minusMonths(1)) && transaction.getDate().isBefore(LocalDateTime.now().plusDays(1)) && categories.contains(transaction.getCategory())) {
@@ -62,7 +91,9 @@ public class AnalysisService {
                 }
             }
         }
-        return monthlySpending;
+
+ */
+
 
     }
 
@@ -75,13 +106,29 @@ public class AnalysisService {
          *     - Если пользователь равен `null`, метод возвращает пустую `TreeMap`.
          */
 
-        LinkedHashMap<String, List<Transaction>> transactionsHistory = new LinkedHashMap<>();
-        List<Transaction> allPayments = new ArrayList<>();
+        // List<Transaction> allPayments = new ArrayList<>();
+
+       // Map<String, List<Transaction>> allPaymentsByCategory = new HashMap<>();
 
         if (user == null) {
-            return transactionsHistory;
+            return new LinkedHashMap<>();
         }
 
+        return getAllPaymentTransactions(user)
+                .collect(Collectors.groupingBy(
+                        Transaction::getCategory,
+                        LinkedHashMap::new,
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                list -> {
+                                    list.sort(Comparator.comparing(Transaction::getAmount).reversed());
+                                    return list;
+                                }
+                        )
+                ));
+
+
+/* старая реализация
         for (BankAccount bankAccount : user.getAccounts()) {
             for (Transaction transaction : bankAccount.getTransactions()) {
                 if ((transaction.getType() == Transaction.Type.PAYMENT)) {
@@ -103,7 +150,9 @@ public class AnalysisService {
         }
 
         transactionsHistory.putAll(grouped);
-        return transactionsHistory;
+
+ */
+
 
     }
 
@@ -115,18 +164,23 @@ public class AnalysisService {
          *     - Если транзакций меньше `N`, возвращается их фактическое количество.
          *     - Если транзакций нет или пользователь равен `null`, метод возвращает пустой список.
          */
-        List<Transaction> transactions = new ArrayList<>();
 
         if (user == null || n <= 0) {
-            return transactions;
+            return Collections.emptyList();
         }
 
+        return user.getAccounts().stream()
+                .flatMap(bankAccount -> bankAccount.getTransactions().stream())
+                .sorted(Comparator.comparing(Transaction::getDate).reversed())
+                .limit(n)
+                .collect(Collectors.toList());
+/*  старая реализация
         for (BankAccount bankAccount : user.getAccounts()) {
             transactions.addAll(bankAccount.getTransactions());
         }
         transactions.sort((t1, t2) -> t2.getDate().compareTo(t1.getDate()));
 
-        return new ArrayList<>(transactions.subList(0, Math.min(n, transactions.size())));
+ */
 
     }
 
@@ -140,14 +194,15 @@ public class AnalysisService {
          *     - Если транзакций нет или пользователь равен `null`, метод возвращает пустую очередь.
          */
 
-        PriorityQueue<Transaction> pq = new PriorityQueue<>(
-                (t1, t2) -> t2.getAmount().compareTo(t1.getAmount())
-        );
-
         if (user == null || n <= 0) {
-            return pq;
+            return new PriorityQueue<>();
         }
 
+        return getAllPaymentTransactions(user)
+                .sorted(Comparator.comparing(Transaction::getAmount).reversed())
+                .limit(n)
+                .collect(Collectors.toCollection(() -> new PriorityQueue<>(Comparator.comparing(Transaction::getAmount).reversed())));
+/* старая реализация
         for (BankAccount bankAccount : user.getAccounts()) {
             for (Transaction transaction : bankAccount.getTransactions()) {
                 if ((transaction.getType() == Transaction.Type.PAYMENT)) {
@@ -163,6 +218,8 @@ public class AnalysisService {
             result.add(pq.poll());
         }
         return result;
+
+ */
 
     }
 

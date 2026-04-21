@@ -93,7 +93,7 @@ public class AnalysisServiceTest {
     @Test
     void testGetMonthlySpendingByCategory_NullAccount() {
         // when
-        BigDecimal result = analysisService.getMonthlySpendingByCategory(null, "Food");
+        BigDecimal result = analysisService.getMonthlySpendingByCategory(null, "FOOD");
 
         // then
         assertEquals(BigDecimal.ZERO, result);
